@@ -10,7 +10,7 @@ typedef struct {
     int end;
 } ThreadArgs;
 
-static void position_thread(void* arg) {
+static void *position_thread(void* arg) {
     ThreadArgs* args = (ThreadArgs*)arg;
 
     byte *grid_in = args->grid_in;
@@ -18,7 +18,6 @@ static void position_thread(void* arg) {
     int grid_size = args->grid_size;
     int start = args->start;
     int end = args->end;
-
     for (int i = start; i < end; i++) {
         for (int j = 0; j < grid_size; j++) {
             for (int dir = 0; dir < NUM_DIRECTIONS; dir++) {
@@ -42,16 +41,12 @@ static void position_thread(void* arg) {
             }
         }
     }
-
-
-
     pthread_exit(NULL);
 }
 
-static void collision_thread(void *arg) {
+static void *collision_thread(void *arg) {
     ThreadArgs* args = (ThreadArgs*)arg;
 
-    byte *grid_in = args->grid_in;
     byte *grid_out = args->grid_out;
     int grid_size = args->grid_size;
     int start = args->start;
@@ -83,7 +78,6 @@ static void update(byte *grid_in, byte *grid_out, int grid_size, int num_threads
 
     for(int i = 0; i < num_threads; i++)
         pthread_join(threads[i], NULL);
-
 
     for(int i = 0; i < num_threads; i++) {
         args[i].grid_in = grid_in;

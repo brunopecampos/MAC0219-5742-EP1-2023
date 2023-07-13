@@ -6,8 +6,8 @@ array_size=("32" "64" "128" "256" "512" "1024" "2048" "4096")
 impl=("pth" "omp")
 
 for array in "${array_size[@]}"; do
-	for threads in "${num_threads[@]}"; do
-        for im in "${impl[@]}"; do
+    for im in "${impl[@]}"; do
+	    for threads in "${num_threads[@]}"; do
             for ((i=1; i<=10; i++)); do
                 ./time_test --grid_size $array --impl $im --num_threads $threads >> ../data/$im-$array-$threads
             done
@@ -18,7 +18,7 @@ done
 impl2=("seq")
 
 for array in "${array_size[@]}"; do
-    for im in "${impl[@]}"; do
+    for im in "${impl2[@]}"; do
         for ((i=1; i<=10; i++)); do
             ./time_test --grid_size $array --impl $im --num_threads $threads >> ../data/$im-$array
         done
