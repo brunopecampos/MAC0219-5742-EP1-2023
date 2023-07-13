@@ -1,7 +1,9 @@
 #include "lga_base.h"
-#include "lga_omp.h"
+#include "lga_seq.h"
+#include <omp.h>
 
-static void update(byte *grid_in, byte *grid_out, int grid_size) {
+static void update(byte *grid_in, byte *grid_out, int grid_size, int num_threads) {
+    #pragma omp parallel for collapse(2) num_threads(num_threads)
     for (int i = 0; i < grid_size; i++) {
         for (int j = 0; j < grid_size; j++) {
             for (int dir = 0; dir < NUM_DIRECTIONS; dir++) {
@@ -26,6 +28,7 @@ static void update(byte *grid_in, byte *grid_out, int grid_size) {
         }
     }
 
+    #pragma omp parallel for collapse(2) num_threads(num_threads)
     for (int i = 0; i < grid_size; i++) {
         for (int j = 0; j < grid_size; j++) {
             grid_out[ind2d(i,j)] = particles_collision(grid_out[ind2d(i,j)]);
@@ -35,7 +38,7 @@ static void update(byte *grid_in, byte *grid_out, int grid_size) {
 
 void simulate_omp(byte *grid_1, byte *grid_2, int grid_size, int num_threads) {
     for (int i = 0; i < ITERATIONS/2; i++) {
-        update(grid_1, grid_2, grid_size);
-        update(grid_2, grid_1, grid_size);
+        update(grid_1, grid_2, grid_size, num_threads);
+        update(grid_2, grid_1, grid_size, num_threads);
     }
 }

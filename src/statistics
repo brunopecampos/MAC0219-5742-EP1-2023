@@ -1,0 +1,54 @@
+#!/usr/bin/python
+
+import sys
+import math
+
+def calculate_average(measurements):
+    return sum(measurements) / len(measurements)
+
+def calculate_confidence_interval(measurements, average, confidence_level):
+    n = len(measurements)
+    standard_deviation = math.sqrt(sum((x - average) ** 2 for x in measurements) / (n - 1))
+    margin = standard_deviation * (1.96 / math.sqrt(n))
+    #lower_limit = average - margin
+    #upper_limit = average + margin
+    return margin
+
+# Get the input file name and output file name from command-line arguments
+#if len(sys.argv) > 2:
+    #input_file = sys.argv[1]
+    #output_file = sys.argv[2]
+#else:
+    #print("Please provide both input and output file names as command-line arguments.")
+    #sys.exit(1)
+
+num_threads = ["100", "1000", "10000"]
+array_size = ["100000", "1000000", "10000000"]
+num_ifs = ["100", "1000", "10000"]
+
+for i in num_ifs:
+    for j in array_size:
+        for k in num_threads:
+            # Read measurements from file
+            input_file = f'{i}-{j}-{k}'
+            print(input_file)
+            measurements = []
+            with open(f'data/{input_file}') as file:
+                for line in file:
+                    measurement = line.strip().rstrip('s')
+                    measurements.append(float(measurement))
+
+            # Calculate average and confidence interval
+            average = calculate_average(measurements)
+            confidence_level = 0.95
+            margin = calculate_confidence_interval(measurements, average, confidence_level)
+            print(f'Results for {i} ifs, {j} array size and {k} threads: ')
+            print(f'Sample Average: {average:.5f}±{margin:.5f}')
+            #print(f'Confidence Interval ({confidence_level*100}%): +-{margin}')
+
+# Write results to file
+#with open(output_file, 'w') as file:
+    #file.write(f'Sample Average: {average}\n')
+    #file.write(f'Confidence Interval ({confidence_level*100}%): [{lower_limit}, {upper_limit}]')
+
+#print(f'Statistics have been calculated and recorded in {output_file}.')

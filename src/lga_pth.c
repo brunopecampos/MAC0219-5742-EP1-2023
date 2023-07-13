@@ -10,7 +10,7 @@ typedef struct {
     int end;
 } ThreadArgs;
 
-static void update_thread(void* arg) {
+static void position_thread(void* arg) {
     ThreadArgs* args = (ThreadArgs*)arg;
 
     byte *grid_in = args->grid_in;
@@ -43,6 +43,20 @@ static void update_thread(void* arg) {
         }
     }
 
+
+
+    pthread_exit(NULL);
+}
+
+static void collision_thread(void *arg) {
+    ThreadArgs* args = (ThreadArgs*)arg;
+
+    byte *grid_in = args->grid_in;
+    byte *grid_out = args->grid_out;
+    int grid_size = args->grid_size;
+    int start = args->start;
+    int end = args->end;
+
     for (int i = start; i < end; i++) {
         for (int j = 0; j < grid_size; j++) {
             grid_out[ind2d(i,j)] = particles_collision(grid_out[ind2d(i,j)]);
@@ -50,11 +64,9 @@ static void update_thread(void* arg) {
     }
 
     pthread_exit(NULL);
-
 }
 
 static void update(byte *grid_in, byte *grid_out, int grid_size, int num_threads) {
-
     pthread_t threads[num_threads];
     ThreadArgs args[num_threads];
 
@@ -66,15 +78,25 @@ static void update(byte *grid_in, byte *grid_out, int grid_size, int num_threads
         args[i].grid_size = grid_size;
         args[i].start = i * chunk_size;
         args[i].end = (i + 1) * chunk_size;
-        
-        pthread_create(&threads[i], NULL, update_thread, (void*)&args[i]);
+        pthread_create(&threads[i], NULL, position_thread, (void*)&args[i]);
     }
 
     for(int i = 0; i < num_threads; i++)
         pthread_join(threads[i], NULL);
 
 
-    
+    for(int i = 0; i < num_threads; i++) {
+        args[i].grid_in = grid_in;
+        args[i].grid_out = grid_out;
+        args[i].grid_size = grid_size;
+        args[i].start = i * chunk_size;
+        args[i].end = (i + 1) * chunk_size;
+        pthread_create(&threads[i], NULL, collision_thread, (void*)&args[i]);
+    }
+
+    for(int i = 0; i < num_threads; i++)
+        pthread_join(threads[i], NULL);
+
 }
 
 void simulate_pth(byte *grid_1, byte *grid_2, int grid_size, int num_threads) {
